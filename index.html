@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word of Wonders: Sarawak Edition</title>
+    <style>
+        /* CSS Modern & Interactive */
+        :root {
+            --primary: #fdb913; /* Kuning Sarawak */
+            --secondary: #000000; /* Hitam Sarawak */
+            --accent: #d82c2c; /* Merah Sarawak */
+            --glass: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Latar belakang gradient bertema Sarawak */
+            background: linear-gradient(135deg, #fdb913 0%, #d82c2c 50%, #000000 100%);
+            color: #333;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 { color: var(--secondary); margin-bottom: 0.5rem; }
+        p.category { color: var(--accent); font-weight: bold; margin-bottom: 1.5rem; }
+
+        .question-box {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            min-height: 60px;
+        }
+
+        .word-display {
+            font-size: 2rem;
+            letter-spacing: 0.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: var(--secondary);
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 12px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background: #e6a800;
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            font-weight: bold;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Sarawak Wonders</h1>
+    <p class="category" id="cat-label">Sejarah & Alam</p>
+    
+    <div class="question-box" id="question">Sila tekan Mula untuk bermain!</div>
+    <div class="word-display" id="word-display">_ _ _ _ _</div>
+    
+    <input type="text" id="answer-input" placeholder="Taip jawapan anda..." autocomplete="off">
+    <br>
+    <button onclick="checkAnswer()">Semak Jawapan</button>
+    <div class="feedback" id="feedback"></div>
+</div>
+
+<script>
+    // Audio Context untuk bunyi tanpa fail luaran
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'win') {
+            osc.frequency.value = 600;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        } else {
+            osc.frequency.value = 200;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+    }
+
+    const data = [
+        { q: "Burung ikonik negeri Sarawak?", a: "KENYALANG" },
+        { q: "Ibu negeri Sarawak?", a: "KUCHING" },
+        { q: "Haiwan primat yang terkenal di Semenggoh?", a: "ORANGUTAN" },
+        { q: "Taman Negara yang terkenal dengan gua terbesar?", a: "MULU" },
+        { q: "Bunga terbesar di dunia yang ada di hutan Sarawak?", a: "RAFFLESIA" },
+        { q: "Sungai terpanjang di Sarawak?", a: "RAJANG" }
+    ];
+
+    let currentLevel = 0;
+
+    function loadQuestion() {
+        if (currentLevel < data.length) {
+            document.getElementById('question').innerText = data[currentLevel].q;
+            document.getElementById('word-display').innerText = "_".repeat(data[currentLevel].a.length);
+            document.getElementById('answer-input').value = "";
+            document.getElementById('feedback').innerText = "";
+        } else {
+            document.getElementById('question').innerText = "Tahniah! Anda sudah khatam semua soalan!";
+            document.getElementById('word-display').innerText = "TAMAT";
+            document.getElementById('answer-input').style.display = "none";
+        }
+    }
+
+    function checkAnswer() {
+        const input = document.getElementById('answer-input').value.toUpperCase();
+        const feedback = document.getElementById('feedback');
+        
+        if (input === data[currentLevel].a) {
+            feedback.innerText = "Betul! Hebat!";
+            feedback.style.color = "green";
+            playSound('win');
+            document.getElementById('word-display').innerText = data[currentLevel].a;
+            
+            setTimeout(() => {
+                currentLevel++;
+                loadQuestion();
+            }, 1500);
+        } else {
+            feedback.innerText = "Salah, cuba lagi!";
+            feedback.style.color = "red";
+            playSound('error');
+        }
+    }
+
+    // Mulakan game
+    loadQuestion();
+</script>
+
+</body>
+</html>
