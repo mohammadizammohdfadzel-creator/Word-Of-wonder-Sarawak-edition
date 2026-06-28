@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Word of Wonders: Sarawak Explorer</title>
+    <style>
+        :root { --primary: #fdb913; --glass: rgba(255, 255, 255, 0.95); }
+        body { 
+            font-family: 'Segoe UI', sans-serif; margin: 0; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; background-size: cover; background-position: center;
+            transition: background 1s ease-in-out;
+        }
+        .card { 
+            background: var(--glass); padding: 2rem; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 90%; max-width: 500px; 
+            text-align: center; backdrop-filter: blur(10px);
+        }
+        /* Style untuk Petak Jawapan */
+        .box-container { display: flex; justify-content: center; gap: 8px; margin: 20px 0; }
+        .letter-box { 
+            width: 40px; height: 40px; border: 2px solid #333; 
+            text-align: center; font-size: 1.5rem; font-weight: bold; 
+            text-transform: uppercase; border-radius: 5px; background: white;
+        }
+        button { padding: 12px 25px; background: var(--primary); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        #game-screen, #leaderboard-screen { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen" class="card">
+    <h2>Sarawak Explorer</h2>
+    <input type="text" id="username" placeholder="Nama Anda" style="width:80%; padding:10px; margin-bottom:10px;">
+    <br><button onclick="startGame()">Mula Bermain</button>
+</div>
+
+<div id="game-screen" class="card">
+    <p id="question" style="font-weight:bold;"></p>
+    <div class="box-container" id="box-container"></div>
+    <button onclick="checkAnswer()">Semak Jawapan</button>
+</div>
+
+<div id="leaderboard-screen" class="card">
+    <h2>Tahniah!</h2>
+    <button onclick="location.reload()">Main Lagi</button>
+</div>
+
+<script>
+    const data = [
+        { q: "Burung ikonik Sarawak?", a: "KENYALANG", url: "https://images.unsplash.com/photo-1549668273-356499878170?q=80&w=1600" },
+        { q: "Ibu negeri Sarawak?", a: "KUCHING", url: "https://images.unsplash.com/photo-1589782182703-2aaa69037b5b?q=80&w=1600" }
+    ];
+
+    let currentLevel = 0;
+
+    function startGame() {
+        if(!document.getElementById('username').value) return alert("Sila masukkan nama!");
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const item = data[currentLevel];
+        document.getElementById('question').innerText = item.q;
+        document.body.style.backgroundImage = `url('${item.url}')`;
+        
+        const container = document.getElementById('box-container');
+        container.innerHTML = "";
+        
+        // Buat kotak berdasarkan panjang jawapan
+        for(let i = 0; i < item.a.length; i++) {
+            let input = document.createElement('input');
+            input.type = "text";
+            input.maxLength = 1;
+            input.className = "letter-box";
+            container.appendChild(input);
+        }
+    }
+
+    function checkAnswer() {
+        const boxes = document.querySelectorAll('.letter-box');
+        let userAns = "";
+        boxes.forEach(box => userAns += box.value.toUpperCase());
+        
+        if(userAns === data[currentLevel].a) {
+            currentLevel++;
+            if(currentLevel < data.length) loadQuestion();
+            else alert("Tammat!");
+        } else {
+            alert("Salah, cuba lagi!");
+        }
+    }
+</script>
+</body>
+</html>
