@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Word of Wonders: Sarawak Explorer</title>
+    <style>
+        :root { --primary: #fdb913; --glass: rgba(255, 255, 255, 0.9); }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background-size: cover; 
+            background-position: center;
+            background-attachment: fixed;
+            transition: background 1s ease-in-out;
+        }
+
+        /* Overlay untuk nampak lebih eksklusif */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 0;
+        }
+
+        .card { 
+            background: var(--glass); 
+            padding: 2.5rem; 
+            border-radius: 25px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            width: 90%; 
+            max-width: 500px; 
+            text-align: center; 
+            z-index: 1;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .box-container { display: flex; justify-content: center; gap: 10px; margin: 25px 0; }
+        
+        .letter-box { 
+            width: 45px; height: 50px; border: 2px solid #555; 
+            text-align: center; font-size: 1.8rem; font-weight: bold; 
+            text-transform: uppercase; border-radius: 8px; background: #fff;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        button { 
+            padding: 12px 35px; background: var(--primary); border: none; 
+            border-radius: 50px; font-weight: bold; cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        button:hover { transform: scale(1.05); background: #e6a800; }
+
+        h2 { color: #2c3e50; margin-bottom: 20px; }
+        #game-screen, #leaderboard-screen { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<!-- Laman Login -->
+<div id="login-screen" class="card">
+    <h1 style="color: #d82c2c;">Sarawak Wonders</h1>
+    <p>Terokai keunikan Bumi Kenyalang</p>
+    <input type="text" id="username" placeholder="Masukkan Nama Anda" style="width:80%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #ccc;">
+    <br><button onclick="startGame()">Mula Cabaran</button>
+</div>
+
+<!-- Laman Permainan -->
+<div id="game-screen" class="card">
+    <p id="question" style="font-size: 1.2rem; font-weight: bold; color: #333;"></p>
+    <div class="box-container" id="box-container"></div>
+    <button onclick="checkAnswer()">Semak Jawapan</button>
+</div>
+
+<script>
+    const data = [
+        { q: "Burung ikonik negeri Sarawak?", a: "KENYALANG", img: "https://images.unsplash.com/photo-1549668273-356499878170?auto=format&fit=crop&w=1000" },
+        { q: "Ibu negeri Sarawak?", a: "KUCHING", img: "https://images.unsplash.com/photo-1589782182703-2aaa69037b5b?auto=format&fit=crop&w=1000" },
+        { q: "Haiwan primat di Semenggoh?", a: "ORANGUTAN", img: "https://images.unsplash.com/photo-1590479773234-f254f3c8340d?auto=format&fit=crop&w=1000" }
+    ];
+
+    let currentLevel = 0;
+
+    function startGame() {
+        if(!document.getElementById('username').value) return alert("Sila masukkan nama!");
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const item = data[currentLevel];
+        document.body.style.backgroundImage = `url('${item.img}')`;
+        document.getElementById('question').innerText = item.q;
+        
+        const container = document.getElementById('box-container');
+        container.innerHTML = "";
+        
+        for(let i = 0; i < item.a.length; i++) {
+            let input = document.createElement('input');
+            input.type = "text"; input.maxLength = 1; input.className = "letter-box";
+            container.appendChild(input);
+        }
+    }
+
+    function checkAnswer() {
+        const boxes = document.querySelectorAll('.letter-box');
+        let userAns = "";
+        boxes.forEach(box => userAns += box.value.toUpperCase());
+        
+        if(userAns === data[currentLevel].a) {
+            currentLevel++;
+            if(currentLevel < data.length) loadQuestion();
+            else alert("Tahniah! Anda sudah selesai semua soalan.");
+        } else {
+            alert("Salah! Cuba lagi.");
+        }
+    }
+</script>
+</body>
+</html>
